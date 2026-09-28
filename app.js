@@ -57,6 +57,8 @@ ru:{
   docTitle:"Pacific Compass — Россия и страны АТР",
   navMap:"Карта", navDyn:"Динамика", navScore:"Оценка", navCountries:"Страны", navFind:"Выводы", navMethod:"Данные и источники", navAbout:"О проекте",
   pgNext:"Дальше", pgPrev:"Назад",
+  themeDark:"Тёмная тема", themeLight:"Светлая тема",
+  presetHint:"Двигайте любой ползунок — набор станет «Свой вариант». Кнопка «Свой вариант» оставляет текущие веса без изменений.",
   heroTitle:"Торговля России со странами АТР, 2021–2026",
   heroLede:"Как менялся товарооборот России с Китаем, Индией, Вьетнамом, Республикой Корея и Японией. Направление и расстояние до каждой столицы отсчитываются от {port}. Размер круга — товарооборот за выбранный год, цвет — рост или снижение к 2021 году.",
   play:"Проиграть 2021–2026", pause:"Пауза",
@@ -127,6 +129,8 @@ en:{
   docTitle:"Pacific Compass — Russia and the Asia-Pacific",
   navMap:"Map", navDyn:"Trends", navScore:"Scoring", navCountries:"Countries", navFind:"Findings", navMethod:"Data & sources", navAbout:"About",
   pgNext:"Next", pgPrev:"Back",
+  themeDark:"Dark mode", themeLight:"Light mode",
+  presetHint:"Move any slider and the set becomes \u201cCustom\u201d. The Custom button keeps the current weights unchanged.",
   heroTitle:"Russia's trade with Asia-Pacific countries, 2021–2026",
   heroLede:"How Russia's trade with China, India, Vietnam, South Korea and Japan has changed. Bearing and distance to each capital are measured from {port}. Circle size shows trade in the selected year; colour shows growth or decline against 2021.",
   play:"Play 2021–2026", pause:"Pause",
@@ -337,10 +341,15 @@ function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").rep
 function idx(c, i){ return c.trade[i] / c.trade[0] * 100; }
 
 /* ---------- static text ---------- */
+function applyTheme(){
+  var dark = document.documentElement.getAttribute("data-theme") === "dark";
+  var b = document.getElementById("themeBtn"); if (b) b.textContent = dark ? t("themeLight") : t("themeDark");
+}
 function applyText(){
   document.documentElement.lang = lang;
   document.querySelectorAll("[data-i]").forEach(function(el){ el.textContent = t(el.getAttribute("data-i")); });
   document.querySelectorAll("[data-lang]").forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-lang") === lang ? "true" : "false"); });
+  applyTheme();
   var pb = document.getElementById("playBtn"); if (pb) pb.textContent = playing ? t("pause") : t("play");
   var hl = document.getElementById("heroLede"); if (hl) hl.textContent = t("heroLede").replace("{port}", t("port_"+portKey+"_gen"));
 }
@@ -509,10 +518,11 @@ function buildPresets(){
   var el = document.getElementById("presets");
   el.setAttribute("aria-label", t("scoreTitle"));
   var keys = ["importer","exporter","safe","econ","custom"];
-  el.innerHTML = keys.map(function(k){ return '<button type="button" class="chip" data-p="'+k+'" aria-pressed="'+(preset===k)+'"'+(k==="custom"?' disabled':'')+'>'+esc(t("preset_"+k))+'</button>'; }).join("");
+  el.innerHTML = keys.map(function(k){ return '<button type="button" class="chip" data-p="'+k+'" aria-pressed="'+(preset===k)+'"'+'>'+esc(t("preset_"+k))+'</button>'; }).join("");
   el.querySelectorAll("button").forEach(function(b){
     b.addEventListener("click", function(){
-      var k = b.getAttribute("data-p"); if (k === "custom") return;
+      var k = b.getAttribute("data-p");
+      if (k === "custom"){ preset = "custom"; buildPresets(); renderScore(); return; }
       preset = k; W = Object.assign({}, PRESETS[k]); buildPresets(); buildSliders(); renderScore();
     });
   });
@@ -649,6 +659,12 @@ document.querySelectorAll("[data-lang]").forEach(function(b){
     try { localStorage.setItem("pc-lang", lang); } catch(e) {}
     renderAll();
   });
+});
+(document.getElementById("themeBtn") || document.createElement("button")).addEventListener("click", function(){
+  var dark = document.documentElement.getAttribute("data-theme") === "dark";
+  if (dark) document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", "dark");
+  try { localStorage.setItem("pc-theme", dark ? "light" : "dark"); } catch(e) {}
+  applyTheme();
 });
 try { var qc = new URLSearchParams(location.search).get("c"); if (qc && C.some(function(x){ return x.id === qc; })) tab = qc; } catch(e) {}
 renderAll();
