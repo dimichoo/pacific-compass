@@ -591,7 +591,7 @@ function renderTabs(){
   p.setAttribute("aria-labelledby", "tab-"+c.id);
   p.innerHTML =
     '<div class="facts">' +
-      '<div class="fact"><b>'+nf(c.trade[LAST_REAL])+'</b><span>'+esc(t("f_trade24"))+'</span></div>' +
+      '<div class="fact"><b>'+(c.approx[LAST_REAL]?"\u2248":"")+nf(c.trade[LAST_REAL])+'</b><span>'+esc(t("f_trade24"))+'</span></div>' +
       '<div class="fact"><b style="color:'+(ch>=0?'var(--up)':'var(--down)')+'">'+(ch>=0?"+":"\u2212")+nf(Math.abs(ch), 0)+'%</b><span>'+esc(t("f_change"))+'</span></div>' +
       '<div class="fact"><b>\u2248'+nf(c.trade[5])+'</b><span>'+esc(t("f_trade26"))+'</span></div>' +
       '<div class="fact"><b>'+nf(Math.round(c.dist/10)*10, 0)+'</b><span>'+esc(t("f_dist_from").replace("{port}", t("port_"+portKey+"_gen")))+'</span></div>' +
